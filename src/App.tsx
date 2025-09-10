@@ -1,0 +1,70 @@
+import { useState } from 'react';
+import { AudioFilesViewer } from './components/audio-files-viewer';
+import { PowerPointUpload } from './components/powerpoint-upload.tsx';
+import type { ExtractAudioResult } from './util/extract-audio-from-ppt';
+
+function App() {
+  const [result, setResult] = useState<
+    (ExtractAudioResult & { name: string }) | null
+  >(null);
+
+  const handleDownload = () => {
+    if (!result) {
+      return;
+    }
+
+    const downloadLink = document.createElement('a');
+    downloadLink.href = URL.createObjectURL(result.zipBlob);
+    downloadLink.download = `${result.name.replace(/\.pptx?/, '')} audio.zip`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
+  return (
+    <main className="bg-orange-100 text-gray-800 dark:bg-orange-300 h-full dark:text-pink-600">
+      <div className="h-full flex flex-col items-center justify-center">
+        <div>
+          <h1 className="text-3xl text-center font-bold mb-8">
+            Powerpoint Audio Extractor
+          </h1>
+
+          {!result ? (
+            <div className="flex flex-col gap-y-2">
+              <PowerPointUpload onResult={setResult} />
+
+              <p className="text-sm text-center text-pink-400 dark:text-rose-400">
+                All processing is done locally in your browser. No files are
+                sent to any server.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-y-2">
+              <p className="font-bold text-center">{result.name}</p>
+
+              <div className="flex justify-between">
+                <button
+                  className="bg-pink-500 hover:bg-pink-700 text-white text-sm font-bold py-2 px-4 rounded transition-colors"
+                  onClick={handleDownload}
+                >
+                  Download Audio
+                </button>
+
+                <button
+                  className="px-3 py-1 text-pink-700 underline underline-offset-5"
+                  onClick={() => setResult(null)}
+                >
+                  Select another file
+                </button>
+              </div>
+
+              <AudioFilesViewer result={result} />
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default App;
