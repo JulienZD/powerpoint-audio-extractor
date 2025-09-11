@@ -36,7 +36,7 @@ export async function extractAudioFromPowerPoint(
       .map((relFile) => contents.files[relFile].async('text')),
   );
 
-  const slideRels = slideRelsData.map((data) => {
+  const slideRels = slideRelsData.map((data, i) => {
     const parser = new DOMParser();
     return parser.parseFromString(data, 'application/xml');
   });
@@ -71,29 +71,54 @@ export async function extractAudioFromPowerPoint(
   } as const;
 }
 
-function matchSlideToAudio(audioFiles: string[], slideRels: any[]) {
-  return audioFiles.map((audioFile) => {
-    const audioFileName = audioFile.replace('ppt/media/', '');
-    const matchedSlides = slideRels
-      .map((relDoc, index) => {
-        const relationships = relDoc.getElementsByTagName('Relationship');
-        for (let i = 0; i < relationships.length; i++) {
-          const rel = relationships[i];
-          const target = rel.getAttribute('Target');
-          if (target && target.includes(audioFileName)) {
-            return index + 1; // Slide numbers are 1-based
-          }
-        }
-        return null;
-      })
-      .filter((slideNumber) => slideNumber !== null);
+function matchSlideToAudio(
+  audioFiles: readonly string[],
+  slideRels: readonly Document[],
+) {
+  return audioFiles
+    .map((audioFile) => {
+      const audioFileName = audioFile.replace('ppt/media/', '');
+      const matchedSlides = slideRels
+        .map((relDoc, index) => {
+          const relationships = relDoc.getElementsByTagName('Relationship');
+          for (const rel of relationships) {
+            const target = rel.getAttribute('Target');
 
-    return {
-      originalName: audioFile,
-      audioFile: audioFileName,
-      slides: matchedSlides as number[],
-    };
-  });
+            // The notesSlideX.xml contains the actual slide number, so use that if available
+            if (target && target.includes(audioFileName)) {
+              const notesSlideTarget = Array.from(relationships)
+                .find((r) => r.getAttribute('Type')?.includes('notesSlide'))
+                ?.getAttribute('Target');
+
+              if (notesSlideTarget) {
+                const match = notesSlideTarget.match(/notesSlide(\d+)\.xml/);
+                if (match) {
+                  return Number.parseInt(match[1], 10);
+                }
+              }
+
+              return index + 1; // Slide numbers are 1-based
+            }
+          }
+          return null;
+        })
+        .filter((slideNumber) => slideNumber !== null);
+
+      return {
+        originalName: audioFile,
+        audioFile: audioFileName,
+        slides: matchedSlides as number[],
+      };
+    })
+    .sort((a, b) => {
+      const bySlide = a.slides[0] - b.slides[0];
+      if (bySlide !== 0) {
+        return bySlide;
+      }
+
+      // Multiple audio files on the same slide, sort by file name
+      return a.audioFile.localeCompare(b.audioFile);
+    });
 }
 
 function toFileName(index: number, slides: number[], audioFile: string) {
