@@ -117,6 +117,15 @@ function matchSlideToAudio(
       }
 
       // Multiple audio files on the same slide, sort by file name
+      // Don't sort by strings, as "audio10.mp3" would come before "audio9.mp3"
+
+      const aMatch = a.audioFile.match(/(\d+)/);
+      const bMatch = b.audioFile.match(/(\d+)/);
+
+      if (aMatch && bMatch) {
+        return Number.parseInt(aMatch[1], 10) - Number.parseInt(bMatch[1], 10);
+      }
+
       return a.audioFile.localeCompare(b.audioFile);
     });
 }
