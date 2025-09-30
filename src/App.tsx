@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { AudioFilesViewer } from './components/audio-files-viewer';
 import { PowerPointUpload } from './components/powerpoint-upload.tsx';
+import { SettingsProvider } from './components/settings/settings.provider';
+import { SettingsConfigurator } from './components/settings/settings-configurator';
 import { Button } from './components/ui/button';
 import type { ExtractAudioResult } from './util/extract-audio-from-ppt';
 
@@ -51,7 +53,9 @@ function App() {
                 </Button>
               </div>
 
-              <AudioFilesViewer result={result} />
+              <SettingsProvider>
+                <AudioFilesViewer result={result} />
+              </SettingsProvider>
             </div>
           )}
         </div>

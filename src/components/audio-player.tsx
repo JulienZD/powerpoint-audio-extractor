@@ -1,6 +1,10 @@
+import { Settings } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSettings } from './settings/settings.provider';
+import { SettingsConfigurator } from './settings/settings-configurator';
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 export const AudioPlayer = ({ files }: { files: File[] }) => {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
@@ -66,11 +70,19 @@ const AudioControls = ({
         />
         <span className="text-sm">Auto-play Next</span>
       </label>
+
+      <Popover>
+        <PopoverTrigger className="text-sm inline-flex items-center gap-1">
+          <Settings size={16} />
+          Settings
+        </PopoverTrigger>
+        <PopoverContent>
+          <SettingsConfigurator />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
-
-const PLAYBACK_RATES = [1, 1.25, 1.5, 1.75, 2, 2.5] as const;
 
 const AudioFilePlayer = ({
   file,
@@ -87,6 +99,10 @@ const AudioFilePlayer = ({
     return url;
   }, [file]);
 
+  const { settings } = useSettings();
+
+  const PLAYBACK_RATES = settings?.playbackSpeeds;
+
   useEffect(() => {
     if (!audioRef.current) return;
 
@@ -101,11 +117,15 @@ const AudioFilePlayer = ({
     }
   }, [file, playbackRate, onFinish]);
 
+  if (!PLAYBACK_RATES) {
+    return null;
+  }
+
   return (
     <div>
       <div>{file.name}</div>
       <audio key={fileURL} ref={audioRef} src={fileURL} controls />
-      <div className="mt-2 flex gap-2">
+      <div className="mt-2 flex flex-wrap max-w-80 gap-2">
         {PLAYBACK_RATES.map((rate) => (
           <PlaybackRateButton
             key={rate}
