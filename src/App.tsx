@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AudioFilesViewer } from './components/audio-files-viewer';
 import { PowerPointUpload } from './components/powerpoint-upload.tsx';
+import { Button } from './components/ui/button';
 import type { ExtractAudioResult } from './util/extract-audio-from-ppt';
 
 function App() {
@@ -22,7 +23,7 @@ function App() {
   };
 
   return (
-    <main className="bg-orange-100 text-gray-800 dark:bg-orange-300 h-full dark:text-pink-600">
+    <main className="text-foreground h-full">
       <div className="h-full flex flex-col items-center justify-center">
         <div>
           <h1 className="text-3xl text-center font-bold mb-8">
@@ -33,7 +34,7 @@ function App() {
             <div className="flex flex-col gap-y-2">
               <PowerPointUpload onResult={setResult} />
 
-              <p className="text-sm text-center text-pink-400 dark:text-rose-400">
+              <p className="text-sm text-center text-secondary-foreground">
                 All processing is done locally in your browser. No files are
                 sent to any server.
               </p>
@@ -43,19 +44,11 @@ function App() {
               <p className="font-bold text-center">{result.name}</p>
 
               <div className="flex justify-between">
-                <button
-                  className="bg-pink-500 hover:bg-pink-700 text-white text-sm font-bold py-2 px-4 rounded transition-colors"
-                  onClick={handleDownload}
-                >
-                  Download Audio
-                </button>
+                <Button onClick={handleDownload}>Download Audio</Button>
 
-                <button
-                  className="px-3 py-1 text-pink-700 underline underline-offset-5"
-                  onClick={() => setResult(null)}
-                >
+                <Button variant="link" onClick={() => setResult(null)}>
                   Select another file
-                </button>
+                </Button>
               </div>
 
               <AudioFilesViewer result={result} />

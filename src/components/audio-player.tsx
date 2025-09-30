@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button } from './ui/button';
+import { Checkbox } from './ui/checkbox';
 
 export const AudioPlayer = ({ files }: { files: File[] }) => {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
@@ -19,13 +21,13 @@ export const AudioPlayer = ({ files }: { files: File[] }) => {
 
       <div className="flex flex-row gap-4">
         {/* File List */}
-        <div className="flex flex-col gap-1 overflow-y-auto max-h-80 border-gray-300 pr-4 text-nowrap">
+        <div className="flex flex-col gap-1 overflow-y-auto max-h-80 border-accent pr-4 text-nowrap align-start justify-start">
           {files.map((file) => (
             <button
               key={file.name}
               onClick={() => setCurrentFile(file)}
-              className={`p-2 rounded ${
-                currentFile === file ? 'bg-gray-200' : ''
+              className={`p-2 rounded hover:bg-accent/70 ${
+                currentFile === file ? 'bg-accent' : ''
               }`}
             >
               {file.name}
@@ -54,12 +56,13 @@ const AudioControls = ({
   setAutoPlay: (value: boolean) => void;
 }) => {
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex items-center gap-4">
       <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={autoPlay}
-          onChange={(e) => setAutoPlay(e.target.checked)}
+          onCheckedChange={(checked) => {
+            setAutoPlay(checked === true);
+          }}
         />
         <span className="text-sm">Auto-play Next</span>
       </label>
@@ -130,13 +133,13 @@ const PlaybackRateButton = ({
   onClick: (rate: number) => void;
   selected: boolean;
 }) => {
-  const backgroundColor = selected ? 'bg-pink-700' : 'bg-pink-500';
   return (
-    <button
+    <Button
       onClick={() => onClick(rate)}
-      className={`p-1 ${backgroundColor} text-white rounded w-10 text-sm`}
+      className="w-10 text-sm rounded"
+      variant={selected ? 'default' : 'secondary'}
     >
       {rate}x
-    </button>
+    </Button>
   );
 };

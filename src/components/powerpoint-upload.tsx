@@ -34,8 +34,8 @@ export const PowerPointUpload = ({
 
   return (
     <div className="max-w-xl mx-auto p-4 flex flex-col items-center justify-center h-full">
-      <form className="flex flex-col gap-4 rounded p-4 shadow-md bg-pink-200 dark:bg-rose-300">
-        <p className="text-sm text-pink-600 dark:text-pink-600 mb-4">
+      <form className="flex flex-col gap-4 rounded p-4 shadow-md bg-card">
+        <p className="text-sm text-card-foreground mb-4">
           Upload a file to extract audio. The audio will be processed
           automatically, allowing you to play it here or download it as a ZIP
           file.

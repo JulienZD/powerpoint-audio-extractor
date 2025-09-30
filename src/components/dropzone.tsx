@@ -47,7 +47,7 @@ export function Dropzone({ options }: { options: DropzoneOptions }) {
         {...getRootProps({
           style,
           className:
-            'dark:bg-pink-700 bg-orange-200 text-gray-600 dark:text-pink-300 cursor-pointer',
+            'bg-secondary text-secondary-foreground cursor-pointer',
         })}
       >
         <input {...getInputProps()} />
