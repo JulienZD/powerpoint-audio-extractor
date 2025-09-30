@@ -67,6 +67,8 @@ const AudioControls = ({
   );
 };
 
+const PLAYBACK_RATES = [1, 1.25, 1.5, 1.75, 2, 2.5] as const;
+
 const AudioFilePlayer = ({
   file,
   onFinish,
@@ -77,42 +79,40 @@ const AudioFilePlayer = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playbackRate, setPlaybackRate] = useState(1);
 
-  const handlePlaybackRateChange = (rate: number) => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = rate;
-    }
-    setPlaybackRate(rate);
-  };
-
-  const fileURL = URL.createObjectURL(file);
-
-  const PLAYBACK_RATES = [1, 1.25, 1.5, 1.75, 2, 2.5];
+  const fileURL = useMemo(() => {
+    const url = URL.createObjectURL(file);
+    return url;
+  }, [file]);
 
   useEffect(() => {
     if (!audioRef.current) return;
 
-    audioRef.current.load();
-    void audioRef.current.play().catch(() => {
-      /*noop*/
-    });
-
     audioRef.current.playbackRate = playbackRate;
     audioRef.current.onended = onFinish;
-  }, [file]);
+
+    const playPromise = audioRef.current.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        // Autoplay might be blocked, ignore
+      });
+    }
+  }, [file, playbackRate, onFinish]);
 
   return (
     <div>
       <div>{file.name}</div>
-      <audio ref={audioRef} controls>
-        <source src={fileURL} type={file.type} />
-        Your browser does not support the audio element.
-      </audio>
+      <audio key={fileURL} ref={audioRef} src={fileURL} controls />
       <div className="mt-2 flex gap-2">
         {PLAYBACK_RATES.map((rate) => (
           <PlaybackRateButton
             key={rate}
             rate={rate}
-            onClick={handlePlaybackRateChange}
+            onClick={(r) => {
+              if (audioRef.current) {
+                audioRef.current.playbackRate = r;
+              }
+              setPlaybackRate(r);
+            }}
             selected={playbackRate === rate}
           />
         ))}
